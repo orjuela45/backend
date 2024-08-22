@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import { connectDB } from "./";
 import routes from '../routes'
 
 export class Server {
@@ -9,6 +10,10 @@ export class Server {
   constructor() {
     this.app = express()
     this.port = Number(process.env.PORT) || 8080
+
+    this.middlewares()
+    this.routes()
+    this.dbConnect()
   }
 
   listen() {
@@ -25,5 +30,9 @@ export class Server {
 
   routes(){
     this.app.use('/api', routes)
+  }
+
+  dbConnect() {
+    connectDB().then(() => console.log('Connected to MongoDB')).catch(err => console.log(err))
   }
 }
