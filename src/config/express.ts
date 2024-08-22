@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import { connectDB } from "./";
 import routes from '../routes'
+import { User } from '../models';
 
 export class Server {
   private app: express.Application
