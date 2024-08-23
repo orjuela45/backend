@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import { connectDB } from './'
 import routes from '../routes'
+import { errorHandler } from '../middlewares'
 
 export class Server {
   private app: express.Application
@@ -14,6 +15,7 @@ export class Server {
     this.middlewares()
     this.routes()
     this.dbConnect()
+    this.app.use(errorHandler)
   }
 
   listen() {
