@@ -1,8 +1,7 @@
 import express from 'express'
 import cors from 'cors'
-import { connectDB } from "./";
+import { connectDB } from './'
 import routes from '../routes'
-import { User } from '../models';
 
 export class Server {
   private app: express.Application
@@ -29,11 +28,13 @@ export class Server {
     this.app.use(express.json())
   }
 
-  routes(){
+  routes() {
     this.app.use('/api', routes)
   }
 
   dbConnect() {
-    connectDB().then(() => console.log('Connected to MongoDB')).catch(err => console.log(err))
+    connectDB()
+      .then(() => console.log('Connected to MongoDB'))
+      .catch((err) => console.log(err))
   }
 }
