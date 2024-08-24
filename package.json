@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "test": "npx vitest",
     "dev:node": "npx nodemon --env-file=.env dist/index.js",
     "dev:tsc": "npx tsc --watch",
     "build": "npx tsc",
