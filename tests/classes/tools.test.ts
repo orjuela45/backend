@@ -14,7 +14,6 @@ describe('tools test', () => {
 
   it('should decrypt string', () => {
     const decrypted = tools.decrypt(stringEncrypted)
-    console.log(decrypted);
     expect(typeof decrypted).toBe('string')
     expect(decrypted).toBe(stringOriginal)
   })
