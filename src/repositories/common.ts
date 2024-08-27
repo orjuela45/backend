@@ -1,5 +1,6 @@
-import mongoose, { UpdateQuery } from 'mongoose'
+import mongoose, { FilterQuery, UpdateQuery } from 'mongoose'
 import createHttpError from 'http-errors'
+import { PaginationInterface } from '../interfaces'
 
 export class CommonRepository<T> {
   public model = mongoose.Model
@@ -9,6 +10,19 @@ export class CommonRepository<T> {
 
   public async getOneById(id: string) {
     const result = await this.model.findById(id)
+    if (!result) throw createHttpError.NotFound('Recurso no encontrado')
+    return result
+  }
+
+  public async getAll(filters?: FilterQuery<T>) {
+    const result = await this.model.find(filters || {})
+    if (!result) throw createHttpError.NotFound('Recurso no encontrado')
+    return result
+  }
+
+  public async getAllWithPagination(pagination?: PaginationInterface, filters?: FilterQuery<T>) {
+    const { page = 0, limit = 100 } = pagination as PaginationInterface
+    const result = await this.model.find(filters || {}).skip(page * limit).limit(limit)
     if (!result) throw createHttpError.NotFound('Recurso no encontrado')
     return result
   }

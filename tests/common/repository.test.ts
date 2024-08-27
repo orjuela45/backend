@@ -1,30 +1,17 @@
-import mongoose from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { dbConnect, dbDisconnect } from '../setupDBTest'
 import { CommonRepository } from '../../src/repositories'
-import { testModelFixture, testModelUpdatedFixture } from '../fixtures'
+import { testModel, seedTestModel, testModelFixture} from '../fixtures'
 
 describe('test common repository', () => {
-  let testModel: mongoose.Model<any>
   let testRepository: CommonRepository<any>
 
   beforeAll(async () => {
     await dbConnect()
-    testModel = mongoose.model(
-      'test',
-      new mongoose.Schema({ 
-        name: String, 
-        email: {type: String, unique: true}, 
-        password: String, 
-        _id: {
-          type: String,
-          default: uuidv4()
-        }
-      }, { timestamps: true }),
-    )
-
     testRepository = new CommonRepository(testModel)
+    await testModel.deleteMany({})
+    await testModel.create(seedTestModel)
   })
 
   afterAll(async () => {
@@ -36,16 +23,31 @@ describe('test common repository', () => {
     expect(test).toBeDefined()
   })
 
-  it('should get a test document', async () => {
+  it('should get a test document by id', async () => {
     const test = await testRepository.getOneById(testModelFixture._id)
     expect(test).toBeDefined()
     expect(test).toMatchObject(testModelFixture)
   })
 
+  it('should get all test documents', async () => {
+    const tests = await testRepository.getAll()
+    expect(tests).toBeDefined()
+    expect(tests.length).toBeGreaterThan(0)
+  })
+
+  it('should get all test documents with pagination', async () => {
+    const tests = await testRepository.getAllWithPagination({ limit: 5, page: 0 })
+    expect(tests).toBeDefined()
+    expect(tests.length).toBe(5)
+    expect(tests[0]).toMatchObject(seedTestModel[0])
+    expect(tests[5]).not.toBeDefined()
+  })
+
   it('should update a test document', async () => {
-    const test = await testRepository.update(testModelFixture._id, testModelUpdatedFixture)
+    const newTest = { ...testModelFixture, name: 'Updated test' }
+    const test = await testRepository.update(testModelFixture._id, newTest)
     expect(test).toBeDefined()
-    expect(test).toMatchObject(testModelUpdatedFixture)
+    expect(test).toMatchObject(newTest)
   })
 
   it('should delete a test document', async () => {
