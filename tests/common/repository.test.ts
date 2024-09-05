@@ -36,11 +36,14 @@ describe('test common repository', () => {
   })
 
   it('should get all test documents with pagination', async () => {
-    const tests = await testRepository.getAllWithPagination({ limit: 5, page: 0 })
+    const page = 0, limit = 5
+    const tests = await testRepository.getAllWithPagination({ limit, page })
     expect(tests).toBeDefined()
-    expect(tests.length).toBe(5)
-    expect(tests[0]).toMatchObject(seedTestModel[0])
-    expect(tests[5]).not.toBeDefined()
+    expect(tests.currentPage).toBe(page)
+    expect(tests.limit).toBe(limit)
+    expect(tests.data.length).toBe(limit)
+    expect(tests.data[0]).toMatchObject(seedTestModel[0])
+    expect(tests.data[5]).not.toBeDefined()
   })
 
   it('should update a test document', async () => {
@@ -58,5 +61,7 @@ describe('test common repository', () => {
   it('should get error if id not found', async () => {
     await expect(testRepository.getOneById(uuidv4())).rejects.toThrow('Recurso no encontrado')
   })
+
+  // TODO: Implementar test para filtros tipo like
 
 })

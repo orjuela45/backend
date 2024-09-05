@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { CommonRepository } from '../repositories'
 import createHttpError from "http-errors";
+import { PaginationInterface } from '../interfaces';
 
 export class CommonController<T, R extends CommonRepository<T>> {
   repository: R
@@ -21,7 +22,19 @@ export class CommonController<T, R extends CommonRepository<T>> {
 
   getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const { limit, page }: PaginationInterface = req.query
+      if (limit || page) {
+        return res.status(200).json(await this.repository.getAllWithPagination({limit, page}))
+      }
       return res.status(200).json(await this.repository.getAll())
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  create = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.status(200).json(await this.repository.create(req.body))
     } catch (error) {
       next(error)
     }

@@ -22,9 +22,19 @@ export class CommonRepository<T> {
 
   public async getAllWithPagination(pagination?: PaginationInterface, filters?: FilterQuery<T>) {
     const { page = 0, limit = 100 } = pagination as PaginationInterface
-    const result = await this.model.find(filters || {}).skip(page * limit).limit(limit)
+    const total = await this.model.countDocuments(filters || {})
+    const result = await this.model
+      .find(filters || {})
+      .skip(page * limit)
+      .limit(limit)
     if (!result) throw createHttpError.NotFound('Recurso no encontrado')
-    return result
+    return {
+      data: result,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      limit,
+    }
   }
 
   public async create(document: T, customMessage?: string) {
@@ -32,7 +42,7 @@ export class CommonRepository<T> {
       const result = await this.model.create(document)
       return result
     } catch (error) {
-      throw createHttpError.BadRequest(customMessage ?? 'Error creando recurso') 
+      throw createHttpError.BadRequest(customMessage ?? 'Error creando recurso')
     }
   }
 
