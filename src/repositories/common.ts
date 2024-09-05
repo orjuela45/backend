@@ -1,6 +1,7 @@
 import mongoose, { FilterQuery, UpdateQuery } from 'mongoose'
 import createHttpError from 'http-errors'
 import { PaginationInterface } from '../interfaces'
+import escapeStringRegexp from 'escape-string-regexp'
 
 export class CommonRepository<T> {
   public model = mongoose.Model
@@ -65,4 +66,11 @@ export class CommonRepository<T> {
       throw createHttpError.BadRequest(customMessage ?? 'Error eliminando recurso')
     }
   }
+
+    public regexFilter(filters: FilterQuery<T>) {
+      return Object.entries(filters).reduce((acc: Record<string, any>, [key, value]) => {
+        acc[key] = { $regex: escapeStringRegexp(value as string) }
+        return acc
+      }, {})
+    }
 }

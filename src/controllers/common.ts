@@ -23,10 +23,14 @@ export class CommonController<T, R extends CommonRepository<T>> {
   getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { limit, page }: PaginationInterface = req.query
-      if (limit || page) {
-        return res.status(200).json(await this.repository.getAllWithPagination({limit, page}))
+      let filters = req.body
+      if (filters && req.url.includes('search')) {
+        filters = this.repository.regexFilter(filters)
       }
-      return res.status(200).json(await this.repository.getAll())
+      if (limit || page) {
+        return res.status(200).json(await this.repository.getAllWithPagination({limit, page}, filters))
+      }
+      return res.status(200).json(await this.repository.getAll(filters))
     } catch (error) {
       next(error)
     }

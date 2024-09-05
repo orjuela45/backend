@@ -34,7 +34,7 @@ export const seedTestModel = [
   {
     _id: uuidv4(),
     name: 'Bernard',
-    email: 'siropep@botil.ai',
+    email: 'siropep@gmail.com',
     password: 'A2kY3',
   },
   {
@@ -70,7 +70,7 @@ export const seedTestModel = [
   {
     _id: uuidv4(),
     name: 'Randall',
-    email: 'nu@ce.tm',
+    email: 'nu@gmail.com',
     password: 'KFXcdWilGDzYDYgWCQq9',
   },
   {
@@ -82,12 +82,12 @@ export const seedTestModel = [
   {
     _id: uuidv4(),
     name: 'Helena',
-    email: 'kikazcoj@ehavezu.br',
+    email: 'kikazcoj@gmail.com',
     password: '54I2Zoti',
   },
   {
     _id: uuidv4(),
-    name: 'Nellie',
+    name: 'Louis',
     email: 'fo@saf.sa',
     password: 'uw2TQwmx8hp',
   },
@@ -106,7 +106,7 @@ export const seedTestModel = [
   {
     _id: uuidv4(),
     name: 'Albert',
-    email: 'lupneeci@honujo.li',
+    email: 'lupneeci@gmail.com',
     password: 'm3XYRKhVdnbz3oW5U33P',
   },
   {
