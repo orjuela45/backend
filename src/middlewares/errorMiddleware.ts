@@ -6,7 +6,6 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
     error: {
       name: err.name ?? 'Error',
       status: err.status ?? 500,
-      statusCode: err.statusCode ?? 500,
       message: err.message,
     },
   });

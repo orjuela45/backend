@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import createHttpError from 'http-errors';
 import { connectDB } from './'
 import routes from '../routes'
 import { errorHandler } from '../middlewares'
@@ -8,13 +9,13 @@ export class Server {
   private app: express.Application
   private port: number
 
-  constructor() {
+  constructor(testMode: boolean = false) {
     this.app = express()
     this.port = Number(process.env.PORT) || 8080
 
     this.middlewares()
     this.routes()
-    this.dbConnect()
+    this.dbConnect(testMode)
     this.app.use(errorHandler)
   }
 
@@ -32,11 +33,18 @@ export class Server {
 
   routes() {
     this.app.use('/api', routes)
+    this.app.use((req, res, next) => {
+      next(createHttpError(404, 'Ruta no encontrada'));
+    });
   }
 
-  dbConnect() {
-    connectDB()
-      .then(() => console.log('Connected to MongoDB'))
+  dbConnect(testMode: boolean) {
+    connectDB(testMode)
+      .then(() => console.log(`Connected to MongoDB in ${testMode ? 'test' : 'production'} mode`))
       .catch((err) => console.log(err))
+  }
+
+  getApp(): express.Application {
+    return this.app;
   }
 }

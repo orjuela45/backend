@@ -1,14 +1,15 @@
 import { v4 as uuidv4 } from 'uuid'
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { dbConnect, dbDisconnect } from '../setupDBTest'
+import escapeStringRegexp from 'escape-string-regexp'
+import { connectDB, dbDisconnect } from '../../src/config'
 import { CommonRepository } from '../../src/repositories'
-import { testModel, seedTestModel, testModelFixture} from '../fixtures'
+import { testModel, seedTestModel, testModelFixture } from '../fixtures'
 
 describe('test common repository', () => {
   let testRepository: CommonRepository<any>
 
   beforeAll(async () => {
-    await dbConnect()
+    await connectDB(true)
     testRepository = new CommonRepository(testModel)
     await testModel.deleteMany({})
     await testModel.create(seedTestModel)
@@ -36,7 +37,8 @@ describe('test common repository', () => {
   })
 
   it('should get all test documents with pagination', async () => {
-    const page = 0, limit = 5
+    const page = 0,
+      limit = 5
     const tests = await testRepository.getAllWithPagination({ limit, page })
     expect(tests).toBeDefined()
     expect(tests.currentPage).toBe(page)
@@ -58,10 +60,25 @@ describe('test common repository', () => {
     expect(test).toBeDefined()
     await expect(testRepository.getOneById(testModelFixture._id)).rejects.toThrow('Recurso no encontrado')
   })
+
   it('should get error if id not found', async () => {
     await expect(testRepository.getOneById(uuidv4())).rejects.toThrow('Recurso no encontrado')
   })
 
-  // TODO: Implementar test para filtros tipo like
+  it('should get test documents with exact match filters', async () => {
+    const filteredResults = seedTestModel.filter((item) => item.name === 'Louis')
+    const tests = await testRepository.getAll({ name: 'Louis' })
+    expect(tests).toBeDefined()
+    expect(tests).toHaveLength(filteredResults.length)
+    expect(tests).toMatchObject(filteredResults)
+  })
+
+  it('should get test documents with partial match filters', async () => {
+    const filteredResults = seedTestModel.filter((item) => item.email.includes('@gmail.com'))
+    const tests = await testRepository.getAll({ email: { $regex: escapeStringRegexp('@gmail.com') } })
+    expect(tests).toBeDefined()
+    expect(tests).toHaveLength(filteredResults.length)
+    expect(tests).toEqual(expect.arrayContaining(filteredResults.map(item => expect.objectContaining(item))));
+  })
 
 })

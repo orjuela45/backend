@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
-import { CommonRepository } from '../repositories'
 import createHttpError from "http-errors";
+import { CommonRepository } from '../repositories'
 import { PaginationInterface } from '../interfaces';
 
 export class CommonController<T, R extends CommonRepository<T>> {
@@ -10,17 +10,17 @@ export class CommonController<T, R extends CommonRepository<T>> {
     this.repository = repository
   }
 
-  getOneById = async (req: Request, res: Response, next: NextFunction) => {
+  public async getOneById(req: Request, res: Response, next: NextFunction){
     try {
       const { id } = req.params
-      if (!id) throw createHttpError.BadRequest('Id no recibido')
+      if (!id) throw createHttpError.BadRequest('Id no recibido') // todo como se repite esto en los otros metodos, puedo ponerlo como middleware joi
       return res.status(200).json(await this.repository.getOneById(id))
     } catch (error) {
       next(error)
     }
   }
 
-  getAll = async (req: Request, res: Response, next: NextFunction) => {
+  public async getAll(req: Request, res: Response, next: NextFunction){
     try {
       const { limit, page }: PaginationInterface = req.query
       let filters = req.body
@@ -36,11 +36,32 @@ export class CommonController<T, R extends CommonRepository<T>> {
     }
   }
 
-  create = async (req: Request, res: Response, next: NextFunction) => {
+  public async create(req: Request, res: Response, next: NextFunction){
     try {
-      return res.status(200).json(await this.repository.create(req.body))
+      return res.status(201).json(await this.repository.create(req.body))
     } catch (error) {
       next(error)
     }
   }
+
+  public async update(req: Request, res: Response, next: NextFunction){
+    try {
+      const { id } = req.params
+      if (!id) throw createHttpError.BadRequest('Id no recibido')
+      return res.status(200).json(await this.repository.update(id, req.body))
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  public async delete(req: Request, res: Response, next: NextFunction){
+    try {
+      const { id } = req.params
+      if (!id) throw createHttpError.BadRequest('Id no recibido')
+      return res.status(200).json(await this.repository.delete(id))
+    } catch (error) {
+      next(error)
+    }
+  }
+
 }

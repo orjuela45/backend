@@ -1,18 +1,22 @@
 import { Router } from 'express'
 import { validateToken } from '../middlewares'
 import { CommonRouter } from './common'
-import { CommonController } from '../controllers'
+import { UserInterface } from 'share/interfaces'
+import { UserController } from '../controllers/user'
 import { CommonRepository } from '../repositories'
-import { User } from '../models'
 
 const router = Router()
 
-router.use('/user', CommonRouter(new CommonController(new CommonRepository(User))))
+router.get('/test',(req, res, next) => {
+  return res.status(200).json({ msg: 'Ruta en prueba' })
+})
 
 router.use(validateToken)
 
-router.use((req, res, next) => {
-  res.status(404).json({ error: 'Ruta no encontrada' })
+router.get('/testToken',(req, res, next) => {
+  return res.status(200).json({ msg: 'Ruta en prueba con token' })
 })
+
+router.use('/user', CommonRouter<UserInterface, CommonRepository<UserInterface>>(new UserController()))
 
 export default router

@@ -1,12 +1,13 @@
-import mongoose, { FilterQuery, UpdateQuery } from 'mongoose'
+import { Model, FilterQuery, UpdateQuery } from 'mongoose'
 import createHttpError from 'http-errors'
 import { PaginationInterface } from '../interfaces'
 import escapeStringRegexp from 'escape-string-regexp'
 
 export class CommonRepository<T> {
-  public model = mongoose.Model
-  constructor(model: mongoose.Model<T>) {
-    this.model = model
+  public model: Model<T>;
+
+  constructor(model: Model<T>) {
+    this.model = model;
   }
 
   public async getOneById(id: string) {

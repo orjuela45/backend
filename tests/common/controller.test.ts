@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid'
 import { describe, it, expect, beforeAll, afterAll, vi, beforeEach } from 'vitest'
 import createHttpError from 'http-errors'
-import { dbConnect, dbDisconnect } from '../setupDBTest'
-import { testModel, seedTestModel } from '../fixtures'
+import { connectDB, dbDisconnect } from '../../src/config'
+import { testModel, seedTestModel, testModelFixture } from '../fixtures'
 import { CommonController } from '../../src/controllers'
 import { CommonRepository } from '../../src/repositories'
 import { Request } from 'express'
@@ -13,7 +13,7 @@ describe('test common controller', () => {
   const next = vi.fn()
 
   beforeAll(async () => {
-    await dbConnect()
+    await connectDB(true)
     testController = new CommonController(new CommonRepository(testModel))
     await testModel.deleteMany({})
     await testModel.create(seedTestModel)
@@ -89,6 +89,22 @@ describe('test common controller', () => {
     expect(next).not.toHaveBeenCalled()
   })
 
+  it('should get 0 test documents with exact match filters', async () => {
+    const req = { body: { name: 'Louiscarlos' }, query: {}, url: '' } as Request
+    await testController.getAll(req, res, next)
+    const filteredResults = seedTestModel
+    .filter(item => item.name === 'Louiscarlos')
+    .map(item => ({
+      _id: item._id,
+      email: item.email,
+      name: item.name,
+      password: item.password
+    }));
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expect.arrayContaining(filteredResults.map(expected => expect.objectContaining(expected))))
+    expect(next).not.toHaveBeenCalled()
+  })
+
   it('should get 2 test documents with exact match filters and pagination', async () => {
     const req = { body: { name: 'Louis' }, query: { limit : 1, page: 1}, url: '' } as any
     await testController.getAll(req, res, next)
@@ -111,15 +127,84 @@ describe('test common controller', () => {
     expect(next).not.toHaveBeenCalled()
   })
 
-  // TODO: crear uno para obtener por filtros tipo like
+  it('should get test documents with partial match filters ', async () => {
+    const req = { body: { email: '@gmail' }, query: { }, url: '/search' } as any
+    await testController.getAll(req, res, next)
+    const filteredResults = seedTestModel
+    .filter(item => item.email.includes('gmail'))
+    .map(item => ({
+      _id: item._id,
+      email: item.email,
+      name: item.name,
+      password: item.password
+    }));
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expect.arrayContaining(filteredResults.map(expected => expect.objectContaining(expected))))
+    expect(next).not.toHaveBeenCalled()
+  })
+  
+  it('should get 0 test documents with partial match filters ', async () => {
+    const req = { body: { email: '@gmailfjndksjlfs' }, query: { }, url: '/search' } as any
+    await testController.getAll(req, res, next)
+    const filteredResults = seedTestModel
+    .filter(item => item.email.includes('gmailfjndksjlfs'))
+    .map(item => ({
+      _id: item._id,
+      email: item.email,
+      name: item.name,
+      password: item.password
+    }));
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expect.arrayContaining(filteredResults.map(expected => expect.objectContaining(expected))))
+    expect(next).not.toHaveBeenCalled()
+  })
 
-  // TODO: crear uno para obtener por filtros tipo like con paginacion
+  it('should get test documents with partial match filters and pagination', async () => {
+    const page = 2, limit = 1
+    const req = { body: { email: '@gmail' }, query: { limit, page}, url: '/search' } as any
+    await testController.getAll(req, res, next)
+    const filteredResults = seedTestModel
+    .filter(item => item.email.includes('@gmail'))
+    .map(item => ({
+      _id: item._id,
+      email: item.email,
+      name: item.name,
+      password: item.password
+    }));
+    const paginatedResults = filteredResults.slice((page - 1) * limit, page * limit);
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith({
+      data: expect.arrayContaining(paginatedResults.map(item => expect.objectContaining(item))),
+      total: filteredResults.length,
+      totalPages: Math.ceil(filteredResults.length / 1),
+      currentPage: page,
+      limit
+    })
+    expect(next).not.toHaveBeenCalled()
+  })
 
-  // TODO: crear uno para crear un nuevo documento
+  it('should create a new test document', async () => {
+    const req = { body: testModelFixture, query: {}, url: '' } as any
+    await testController.create(req, res, next)
+    expect(res.status).toHaveBeenCalledWith(201)
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining(testModelFixture))
+    expect(next).not.toHaveBeenCalled()
+  })
 
-  // TODO: crear uno para crear varios nuevos documentos
+  it('should update a test document', async () => {
+    const newTest = { ...testModelFixture, name: 'Updated test' }
+    const req = { body: newTest, query: {}, url: '', params: {id: testModelFixture._id} } as any
+    await testController.update(req, res, next)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining(newTest))
+    expect(next).not.toHaveBeenCalled()
+  })
 
-  // TODO: crear uno para actualizar un documento
-
-  // TODO: crear uno para eliminar un documento
+  it('should delete a test document', async () => {
+    const req = { body: {}, query: {}, url: '', params: {id: seedTestModel[4]._id} } as any
+    await testController.delete(req, res, next)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining(seedTestModel[4]))
+    expect(next).not.toHaveBeenCalled()
+  })
 })
