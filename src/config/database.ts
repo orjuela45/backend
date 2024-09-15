@@ -14,5 +14,5 @@ export const connectDB = async (testMode = false) => {
 
 export const dbDisconnect = async () => {
   await mongoose.disconnect()
-  await mongoServer.stop()
+  if (mongoServer) await mongoServer.stop()
 }

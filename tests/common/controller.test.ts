@@ -207,4 +207,48 @@ describe('test common controller', () => {
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining(seedTestModel[4]))
     expect(next).not.toHaveBeenCalled()
   })
+
+  it('should get one test document with exact match filters', async () => {
+    const req = { body: { name: 'Louis' }, query: {}, url: '' } as Request
+    await testController.getOneByFilters(req, res, next)
+    const filteredResults = seedTestModel
+    .filter(item => item.name === 'Louis')
+    .map(item => ({
+      _id: item._id,
+      email: item.email,
+      name: item.name,
+      password: item.password
+    }));
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining(filteredResults[0]))
+    expect(next).not.toHaveBeenCalled()
+  })
+
+  it('should get error if test documents with exact match filters not found', async () => {
+    const req = { body: { name: 'Louiscarlos' }, query: {}, url: '' } as Request
+    await testController.getOneByFilters(req, res, next)
+    expect(next).toHaveBeenCalledWith(createHttpError.NotFound('Recurso no encontrado'))
+  })
+  
+  it('should get one test document with partial match filters', async () => {
+    const req = { body: { name: 'Loui' }, query: {}, url: '/search' } as Request
+    await testController.getOneByFilters(req, res, next)
+    const filteredResults = seedTestModel
+    .filter(item => item.name.includes('Loui'))
+    .map(item => ({
+      _id: item._id,
+      email: item.email,
+      name: item.name,
+      password: item.password
+    }));
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining(filteredResults[0]))
+    expect(next).not.toHaveBeenCalled()
+  })
+
+  it('should get error if test documents with partial match filters not found', async () => {
+    const req = { body: { name: 'Louiscar' }, query: {}, url: '/search' } as Request
+    await testController.getOneByFilters(req, res, next)
+    expect(next).toHaveBeenCalledWith(createHttpError.NotFound('Recurso no encontrado'))
+  })
 })

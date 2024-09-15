@@ -13,8 +13,20 @@ export class CommonController<T, R extends CommonRepository<T>> {
   public async getOneById(req: Request, res: Response, next: NextFunction){
     try {
       const { id } = req.params
-      if (!id) throw createHttpError.BadRequest('Id no recibido') // todo como se repite esto en los otros metodos, puedo ponerlo como middleware joi
+      if (!id) throw createHttpError.BadRequest('Id no recibido') 
       return res.status(200).json(await this.repository.getOneById(id))
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  public async getOneByFilters(req: Request, res: Response, next: NextFunction){
+    try {
+      let filters = req.body
+      if (filters && req.url.includes('search')) {
+        filters = this.repository.regexFilter(filters)
+      }
+      return res.status(200).json(await this.repository.getOneByFiltes(filters))
     } catch (error) {
       next(error)
     }

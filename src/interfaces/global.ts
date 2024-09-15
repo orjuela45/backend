@@ -3,7 +3,7 @@ import { UserInterface } from "share/interfaces";
 declare global {
   namespace Express {
     interface Request {
-      id?: number
+      id?: string
       user?: UserInterface
     }
   }

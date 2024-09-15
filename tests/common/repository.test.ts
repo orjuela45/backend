@@ -78,7 +78,29 @@ describe('test common repository', () => {
     const tests = await testRepository.getAll({ email: { $regex: escapeStringRegexp('@gmail.com') } })
     expect(tests).toBeDefined()
     expect(tests).toHaveLength(filteredResults.length)
-    expect(tests).toEqual(expect.arrayContaining(filteredResults.map(item => expect.objectContaining(item))));
+    expect(tests).toEqual(expect.arrayContaining(filteredResults.map((item) => expect.objectContaining(item))))
   })
 
+  it('should get one test document with multiple filters', async () => {
+    const filteredResults = seedTestModel.filter((item) => item.email.includes('@motepwe') && item.name === 'Cody')
+    const test = await testRepository.getOneByFiltes({
+      email: { $regex: escapeStringRegexp('@motepwe') },
+      name: 'Cody',
+    })
+    expect(test).toBeDefined()
+    expect(test).toMatchObject(filteredResults[0])
+  })
+
+  it('should get error with multiple filters not found', async () => {
+    await expect(
+      testRepository.getOneByFiltes({ email: { $regex: escapeStringRegexp('@motepwe.com') }, name: 'Cody' }),
+    ).rejects.toThrow('Recurso no encontrado')
+  })
+  
+  it('should get error with multiple filters not found and a custom message', async () => {
+    const customMessage = 'Documentos no encontrados'
+    await expect(
+      testRepository.getOneByFiltes({ email: { $regex: escapeStringRegexp('@motepwe.com') }, name: 'Cody' }, {customMessage}),
+    ).rejects.toThrow(customMessage)
+  })
 })

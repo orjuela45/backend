@@ -11,7 +11,11 @@ export const validationJoi = (joiSchema: Schema, typeMethod : string = 'body') =
           : typeMethod === 'query'
           ? req.query
           : req.body;
-      joiSchema.validate(data, {context: {multipart: true}})
+      const {error} = await joiSchema.validate(data, {context: {multipart: true}})
+      if (error) {
+        const validationError = error.details.map(detail => detail.message).join(', ');
+        throw createError.BadRequest(validationError);
+      }
       next()
     } catch (error) {
       const validationError = error as ValidationError

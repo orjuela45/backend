@@ -1,1 +1,2 @@
-export * from './testModel'
+export * from './testFixrture'
+export * from './userFixture'
