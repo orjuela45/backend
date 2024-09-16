@@ -26,7 +26,7 @@ describe("test Auth", () => {
   })
   
   it("should get error because user not found", async() => {
-    await expect(auth.login('miguelorjuela@gmail.com', '1234567890')).rejects.toThrowError("Usuario no encontrado con esas credenciales")
+    await expect(auth.login('miguelorjuela@gmail.com', '1234567890')).rejects.toThrowError("Email no registrado")
   })
 
   it("should get token because user found", async () => {

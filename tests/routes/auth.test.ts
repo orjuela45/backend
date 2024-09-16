@@ -4,6 +4,7 @@ import { Server } from '../../src/config'
 import { dbDisconnect } from '../../src/config'
 import { userSeed } from '../fixtures'
 import { User } from '../../src/models'
+import { Tools } from '../../src/classes'
 
 describe('test auth module', () => {
   const server = new Server(true)
@@ -11,11 +12,6 @@ describe('test auth module', () => {
 
   beforeAll(async () => {
     await User.create(userSeed)
-    const user = await User.find({
-      email: 'miguel@gmail.com',
-      password: '1234567890',
-    })
-    console.log(user);
   })
 
   afterAll(async () => {
@@ -65,7 +61,7 @@ describe('test auth module', () => {
     expect(response.status).toBe(404)
     expect(response.body).toMatchObject({
       error: {
-        message: 'Usuario no encontrado con esas credenciales',
+        message: 'Email no registrado',
         status: 404,
         name: 'NotFoundError',
       },

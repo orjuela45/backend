@@ -24,7 +24,7 @@ export class CommonController<T, R extends CommonRepository<T>> {
     try {
       let filters = req.body
       if (filters && req.url.includes('search')) {
-        filters = this.repository.regexFilter(filters)
+        filters = await this.repository.regexFilter(filters)
       }
       return res.status(200).json(await this.repository.getOneByFiltes(filters))
     } catch (error) {
@@ -37,7 +37,7 @@ export class CommonController<T, R extends CommonRepository<T>> {
       const { limit, page }: PaginationInterface = req.query
       let filters = req.body
       if (filters && req.url.includes('search')) {
-        filters = this.repository.regexFilter(filters)
+        filters = await this.repository.regexFilter(filters)
       }
       if (limit || page) {
         return res.status(200).json(await this.repository.getAllWithPagination({limit, page}, filters))
